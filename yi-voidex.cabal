@@ -1,0 +1,16 @@
+name:            yi-voidex
+version:         0.1.0
+synopsis:        My configs for Yi editor
+category:        Development, Editor
+homepage:        http://github.com/mvoidex/yi-voidex
+author:          Alexandr `voidex` Ruchkin
+license:         BSD3
+cabal-version:   >= 1.10
+build-type:      Simple
+
+library
+    hs-source-dirs: src
+    build-depends:
+        base            >= 4 && < 5
+    exposed-modules:
+        Yi.Config.Users.VoidEx
