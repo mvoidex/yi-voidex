@@ -9,6 +9,11 @@ import Yi
 
 import Yi.Keymap
 
+import Yi.Keymap.Users.VoidEx (keymapSet)
+
 -- | My config
 voidexConfig :: Config
-voidexConfig = undefined
+voidexConfig = defaultConfig {
+    defaultKm = keymapSet,
+    configUI = (configUI defaultConfig) {
+        configWindowFill = ' ' }}
