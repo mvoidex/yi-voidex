@@ -44,22 +44,24 @@ select = choice [shift k ?>>! setMark False >> a | (k, a) <- moveKeys]
 -- | Other commands
 other :: Keymap
 other = choice [
-    spec KBS           ?>>! deleteSel bdeleteB,
-    spec KDel          ?>>! deleteSel (deleteN 1),
-    spec KEnter        ?>>! replaceSel "\n",
-    spec KTab          ?>>! (replaceSel =<< tabB),
-    ctrl (char 'n')    ?>>! startMenu test,
-    ctrl (char 'q')    ?>>! askQuitEditor,
-    ctrl (char 'f')    ?>>  isearchKeymap Forward,
-    ctrl (char 'x')    ?>>! cut,
-    ctrl (char 'c')    ?>>! copy,
-    ctrl (char 'v')    ?>>! paste,
-    ctrl (spec KIns)   ?>>! copy,
-    shift (spec KIns)  ?>>! paste,
-    ctrl (char 'z')    ?>>! undoB,
-    ctrl (char 'y')    ?>>! redoB,
-    ctrl (char 's')    ?>>! fwriteE,
-    ctrl (char 'o')    ?>>! findFile]
+    spec KBS                   ?>>! deleteSel bdeleteB,
+    spec KDel                  ?>>! deleteSel (deleteN 1),
+    spec KEnter                ?>>! replaceSel "\n",
+    spec KTab                  ?>>! (replaceSel =<< tabB),
+    ctrl (spec KTab)           ?>>! nextWinE,
+    ctrl (shift (spec KTab))   ?>>! prevWinE,
+    ctrl (char 'n')            ?>>! startMenu test,
+    ctrl (char 'q')            ?>>! askQuitEditor,
+    ctrl (char 'f')            ?>>  isearchKeymap Forward,
+    ctrl (char 'x')            ?>>! cut,
+    ctrl (char 'c')            ?>>! copy,
+    ctrl (char 'v')            ?>>! paste,
+    ctrl (spec KIns)           ?>>! copy,
+    shift (spec KIns)          ?>>! paste,
+    ctrl (char 'z')            ?>>! undoB,
+    ctrl (char 'y')            ?>>! redoB,
+    ctrl (char 's')            ?>>! fwriteE,
+    ctrl (char 'o')            ?>>! findFile]
 
 -- | Move keys
 moveKeys :: [(Event, BufferM ())]

@@ -13,9 +13,11 @@ import Yi.Core
 import Yi.File
 import Yi.MiniBuffer (spawnMinibufferE)
 
+import Yi.Mode.Haskell (ghciLoadBuffer, ghciInferType)
+
 import Yi.Keymap.Emacs.Utils (askQuitEditor)
 
-import Control.Monad (fmap)
+import Control.Monad (fmap, void)
 import Data.List (map, intercalate)
 import Data.Char (isUpper, toLower)
 import Data.Maybe (mapMaybe)
@@ -44,8 +46,8 @@ actionB_ title act = actionB title (const act)
 actionB :: String -> (MenuContext -> BufferM ()) -> MenuItem
 actionB title act = MenuAction title act' where
     act' ctx c = char c ?>>! (do
-        withGivenBuffer0 (parentBuffer ctx) (act ctx)
-        closeBufferAndWindowE)
+        closeBufferAndWindowE
+        withGivenBuffer0 (parentBuffer ctx) (act ctx))
 
 -- | Action menu
 actionE_ :: String -> EditorM () -> MenuItem
@@ -54,7 +56,7 @@ actionE_ title act = actionE title (const act)
 -- | Action with context
 actionE :: String -> (MenuContext -> EditorM ()) -> MenuItem
 actionE title act = MenuAction title act' where
-    act' ctx c = char c ?>>! (act ctx >> closeBufferAndWindowE)
+    act' ctx c = char c ?>>! (closeBufferAndWindowE >> act ctx)
 
 -- | Action on Yi
 actionY_ :: String -> YiM () -> MenuItem
@@ -63,7 +65,7 @@ actionY_ title act = actionY title (const act)
 -- | Action on Yi with context
 actionY :: String -> (MenuContext -> YiM ()) -> MenuItem
 actionY title act = MenuAction title act' where
-    act' ctx c = char c ?>>! (act ctx >> withEditor closeBufferAndWindowE)
+    act' ctx c = char c ?>>! (withEditor closeBufferAndWindowE >> act ctx)
 
 -- | Fold menu item
 foldItem
@@ -107,4 +109,17 @@ startMenu m = do
 test = [
     menu "File" [
         actionY_ "Quit" askQuitEditor,
-        actionY "Save" (fwriteBufferE . parentBuffer)]]
+        actionY "Save" (fwriteBufferE . parentBuffer)],
+    menu "Tools" [
+        menu "Ghci" [
+            actionY_ "Load" ghciLoadBuffer,
+            actionY_ "Infer-type" ghciInferType]],
+    menu "View" [
+        actionE_ "Next-window" nextWinE,
+        actionE_ "Previous-window" prevWinE,
+        actionE_ "Split" splitE,
+        actionE_ "sWap-with-first" swapWinWithFirstE,
+        actionE_ "Close" closeBufferAndWindowE,
+        actionE "New" (void . newWindowE False . parentBuffer),
+        actionE_ "Enlarge" enlargeWinE,
+        actionE_ "shRink" shrinkWinE]]
