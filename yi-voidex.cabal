@@ -15,5 +15,6 @@ library
         base            >= 4 && < 5,
         yi              >= 0.6.5 && < 0.7
     exposed-modules:
+        Yi.Keymap.Menu
         Yi.Keymap.Users.VoidEx
         Yi.Config.Users.VoidEx
