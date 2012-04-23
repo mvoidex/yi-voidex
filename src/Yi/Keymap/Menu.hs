@@ -1,7 +1,8 @@
 module Yi.Keymap.Menu (
     Menu,
     MenuItem,
-    menu, action,
+    MenuContext(..),
+    menu, action, actionX,
     startMenu,
     test
     ) where
@@ -24,8 +25,12 @@ type Menu = [MenuItem]
 
 -- | Menu utem
 data MenuItem =
-    MenuAction String (Char -> Keymap) |
+    MenuAction String (MenuContext -> Char -> Keymap) |
     SubMenu String Menu
+
+-- | Menu action context
+data MenuContext = MenuContext {
+    parentBuffer :: BufferRef }
 
 -- | Sub menu
 menu :: String -> Menu -> MenuItem
@@ -33,15 +38,27 @@ menu = SubMenu
 
 -- | Action menu
 action :: (YiAction a x, Show x) => String -> a -> MenuItem
-action title act = MenuAction title (\c -> char c ?>>! act)
+action title act = MenuAction title (\ctx c -> char c ?>>! act)
+
+-- | Action with menu context
+actionX :: (YiAction a x, Show x) => String -> (MenuContext -> a) -> MenuItem
+actionX title act = MenuAction title (\ctx c -> char c ?>>! act ctx)
 
 -- | Fold menu item
-foldItem :: (String -> (Char -> Keymap) -> a) -> (String -> [a] -> a) -> MenuItem -> a
+foldItem
+    :: (String -> (MenuContext -> Char -> Keymap) -> a)
+    -> (String -> [a] -> a)
+    -> MenuItem
+    -> a
 foldItem mA sM (MenuAction title act) = mA title act
 foldItem mA sM (SubMenu title sm) = sM title (map (foldItem mA sM) sm)
 
 -- | Fold menu
-foldMenu :: (String -> (Char -> Keymap) -> a) -> (String -> [a] -> a) -> Menu -> [a]
+foldMenu
+    :: (String -> (MenuContext -> Char -> Keymap) -> a)
+    -> (String -> [a] -> a)
+    -> Menu
+    -> [a]
 foldMenu mA sM = map (foldItem mA sM)
 
 -- | Menu title to keymap
@@ -50,18 +67,23 @@ menuEvent = fmap toLower . find isUpper
 
 -- | Start menu action
 startMenu :: Menu -> EditorM ()
-startMenu = showMenu . foldMenu onItem onSub where
-    showMenu ::[(String, Maybe Keymap)] -> EditorM ()
-    showMenu is = do
-        spawnMinibufferE (intercalate " " (map fst is)) (const (subMap is))
-        return ()
-    onItem title act = (title, fmap act (menuEvent title))
-    onSub title is = (title, fmap (\c -> char c ?>>! showMenu is) (menuEvent title))
-    subMap is = choice $ closeMenu : mapMaybe snd is where
-        closeMenu = spec KEsc ?>>! closeBufferAndWindowE
+startMenu m = do
+    ctx <- fmap MenuContext (gets currentBuffer)
+    startMenu' ctx m
+    where
+        startMenu' ctx = showMenu . foldMenu onItem onSub where
+            showMenu :: [(String, Maybe Keymap)] -> EditorM ()
+            showMenu is = do
+                spawnMinibufferE (intercalate " " (map fst is)) (const (subMap is))
+                return ()
+            onItem title act = (title, fmap (act ctx) (menuEvent title))
+            onSub title is = (title, fmap subMenu (menuEvent title)) where
+                subMenu c = char c ?>>! closeBufferAndWindowE >> showMenu is
+            subMap is = choice $ closeMenu : mapMaybe snd is where
+                closeMenu = spec KEsc ?>>! closeBufferAndWindowE
 
 -- | Test menu with only File - Quit item
 test = [
     menu "File" [
         action "Quit" askQuitEditor,
-        action "Save" fwriteE]]
+        actionX "Save" (fwriteBufferE . parentBuffer)]]
