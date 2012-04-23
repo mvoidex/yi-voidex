@@ -10,12 +10,16 @@ module Yi.Keymap.Users.VoidEx (
 
 import Prelude (length, take, drop)
 
+import Control.Monad (void)
+
 import Yi.Core
 import Yi.File
 import Yi.Keymap.Emacs.Utils
 import Yi.Misc (adjBlock)
 import Yi.Rectangle
 import Yi.String
+import Yi.Window
+import Yi.TextCompletion (wordComplete)
 
 import Yi.Keymap.Menu (startMenu)
 import Yi.Keymap.Users.VoidEx.Menu (mainMenu)
@@ -26,7 +30,7 @@ keymapSet = modelessKeymapSet keymap
 
 -- | Keymap
 keymap :: Keymap
-keymap = inputChar <|> move <|> select <|> other
+keymap = other <|> move <|> select <|> inputChar
 
 -- | Printable chars
 inputChar :: Keymap
@@ -49,6 +53,7 @@ other = choice [
     spec KDel                  ?>>! deleteSel (deleteN 1),
     spec KEnter                ?>>! replaceSel "\n",
     spec KTab                  ?>>! (replaceSel =<< tabB),
+    ctrl (char ' ')            ?>>! wordComplete,
     ctrl (char 'n')            ?>>! startMenu mainMenu,
     ctrl (char 'q')            ?>>! askQuitEditor,
     ctrl (char 'f')            ?>>  isearchKeymap Forward,
@@ -73,16 +78,28 @@ moveKeys = [
     (ctrl (spec KEnd)       , maybeMoveB Document Forward),
     (super (spec KUp)       , maybeMoveB Document Backward),
     (super (spec KDown)     , maybeMoveB Document Forward),
-    (spec KPageUp           , maybeMoveB Document Backward),
-    (spec KPageDown         , maybeMoveB Document Forward),
-    (ctrl (spec KRight)     , maybeMoveB unitWord Forward),
-    (ctrl (spec KLeft)      , maybeMoveB unitWord Backward),
+    (spec KPageUp           , pageUp),
+    (spec KPageDown         , pageDown),
+    (ctrl (spec KRight)     , moveB unitWord Forward),
+    (ctrl (spec KLeft)      , moveB unitWord Backward),
     (ctrl (spec KUp)        , scrollB (-1)),
     (ctrl (spec KDown)      , scrollB 1),
     (spec KUp               , moveB VLine Backward),
     (spec KDown             , moveB VLine Forward),
     (spec KRight            , moveB Character Forward),
     (spec KLeft             , moveB Character Backward)]
+
+-- | Page up
+pageUp :: BufferM ()
+pageUp = do
+    h <- askWindow height
+    void $ lineMoveRel $ negate $ h - 3
+
+-- | Page down
+pageDown :: BufferM ()
+pageDown = do
+    h <- askWindow height
+    void $ lineMoveRel $ h - 3
 
 -- | Cut action
 cut :: EditorM ()

@@ -15,7 +15,7 @@ import Yi.Keymap.Users.VoidEx (keymapSet)
 voidexConfig :: Config
 voidexConfig = defaultConfig {
     defaultKm = keymapSet,
-    startActions = [BufferA setIndent],
+    initialActions = [BufferA setIndent],
     configUI = (configUI defaultConfig) {
         configWindowFill = ' ' }}
 
