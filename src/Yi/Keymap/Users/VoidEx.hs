@@ -48,7 +48,7 @@ other = choice [
     spec KDel          ?>>! deleteSel (deleteN 1),
     spec KEnter        ?>>! replaceSel "\n",
     spec KTab          ?>>! (replaceSel =<< tabB),
-    spec KMenu         ?>>! startMenu test,
+    ctrl (char 'n')    ?>>! startMenu test,
     ctrl (char 'q')    ?>>! askQuitEditor,
     ctrl (char 'f')    ?>>  isearchKeymap Forward,
     ctrl (char 'x')    ?>>! cut,

@@ -9,13 +9,14 @@ module Yi.Keymap.Menu (
 import Prelude ()
 
 import Yi.Core
+import Yi.File
 import Yi.MiniBuffer (spawnMinibufferE)
 
 import Yi.Keymap.Emacs.Utils (askQuitEditor)
 
 import Control.Monad (fmap)
 import Data.List (map, intercalate)
-import Data.Char (isUpper)
+import Data.Char (isUpper, toLower)
 import Data.Maybe (mapMaybe)
 
 -- | Menu
@@ -45,7 +46,7 @@ foldMenu mA sM = map (foldItem mA sM)
 
 -- | Menu title to keymap
 menuEvent :: String -> Maybe Char
-menuEvent = find isUpper
+menuEvent = fmap toLower . find isUpper
 
 -- | Start menu action
 startMenu :: Menu -> EditorM ()
@@ -57,9 +58,10 @@ startMenu = showMenu . foldMenu onItem onSub where
     onItem title act = (title, fmap act (menuEvent title))
     onSub title is = (title, fmap (\c -> char c ?>>! showMenu is) (menuEvent title))
     subMap is = choice $ closeMenu : mapMaybe snd is where
-        closeMenu = spec KEsc ?>>! closeBufferE ""
+        closeMenu = spec KEsc ?>>! closeBufferAndWindowE
 
 -- | Test menu with only File - Quit item
 test = [
     menu "File" [
-        action "Quit" askQuitEditor]]
+        action "Quit" askQuitEditor,
+        action "Save" fwriteE]]
