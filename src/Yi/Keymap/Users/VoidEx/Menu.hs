@@ -7,7 +7,7 @@ import Prelude ()
 import Yi.Core
 import Yi.File
 import Yi.Keymap.Emacs.Utils (askQuitEditor)
-import Yi.Mode.Haskell (ghciLoadBuffer, ghciInferType)
+import Yi.Mode.Haskell (ghciLoadBuffer, ghciInferType, ghciSend)
 
 import Yi.Keymap.Menu
 
@@ -19,15 +19,16 @@ mainMenu = [
         actionY "Save" (fwriteBufferE . parentBuffer)],
     menu "Tools" [
         menu "Ghci" [
-            actionY_ "Load" ghciLoadBuffer,
-            actionY_ "Infer-type" ghciInferType]],
+            actionY_ "Load" ghciLoad,
+            actionY_ "Infer-type" ghciInfer]],
     menu "View" [
         menu "Windows" [
             actionE_ "Next" nextWinE,
             actionE_ "Previous" prevWinE,
             actionE_ "Split" splitE,
             actionE_ "sWap" swapWinWithFirstE,
-            actionE_ "Close" tryCloseE],
+            actionE_ "Close" tryCloseE,
+            actionE_ "cLose-all-but-this" closeOtherE],
         menu "Tabs" [
             actionE_ "Next" nextTabE,
             actionE_ "Previous" previousTabE,
@@ -36,3 +37,15 @@ mainMenu = [
         menu "Buffers" [
             actionE_ "Close" closeBufferAndWindowE,
             actionE_ "Show all" openAllBuffersE]]]
+
+-- | Load buffer in GHCi
+ghciLoad :: YiM ()
+ghciLoad = do
+    ghciLoadBuffer
+    ghciSend $ ":set prompt " ++ show "ghci> "
+
+-- | Infer type
+ghciInfer :: YiM ()
+ghciInfer = do
+    ghciLoad
+    ghciInferType
