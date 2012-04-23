@@ -22,14 +22,17 @@ mainMenu = [
             actionY_ "Load" ghciLoadBuffer,
             actionY_ "Infer-type" ghciInferType]],
     menu "View" [
-        actionE_ "Next-window" nextWinE,
-        actionE_ "Previous-window" prevWinE,
-        actionE_ "Split" splitE,
-        actionE_ "sWap-with-first" swapWinWithFirstE,
-        actionE_ "Close-buffer" closeBufferAndWindowE,
-        actionE_ "Try-close-window" tryCloseE,
-        actionE_ "sHow-all" openAllBuffersE,
-        actionE_ "nEw-tab" newTabE,
-        actionE_ "neXt-tab" nextTabE,
-        actionE_ "pRevious-tab" previousTabE,
-        actionE_ "Delete-tab" deleteTabE]]
+        menu "Windows" [
+            actionE_ "Next" nextWinE,
+            actionE_ "Previous" prevWinE,
+            actionE_ "Split" splitE,
+            actionE_ "sWap" swapWinWithFirstE,
+            actionE_ "Close" tryCloseE],
+        menu "Tabs" [
+            actionE_ "Next" nextTabE,
+            actionE_ "Previous" previousTabE,
+            actionE_ "neW" newTabE,
+            actionE_ "Delete" deleteTabE],
+        menu "Buffers" [
+            actionE_ "Close" closeBufferAndWindowE,
+            actionE_ "Show all" openAllBuffersE]]]
