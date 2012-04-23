@@ -17,7 +17,8 @@ import Yi.Misc (adjBlock)
 import Yi.Rectangle
 import Yi.String
 
-import Yi.Keymap.Menu (startMenu, test)
+import Yi.Keymap.Menu (startMenu)
+import Yi.Keymap.Users.VoidEx.Menu (mainMenu)
 
 -- | Keymap set
 keymapSet :: KeymapSet
@@ -48,9 +49,7 @@ other = choice [
     spec KDel                  ?>>! deleteSel (deleteN 1),
     spec KEnter                ?>>! replaceSel "\n",
     spec KTab                  ?>>! (replaceSel =<< tabB),
-    ctrl (spec KTab)           ?>>! nextWinE,
-    ctrl (shift (spec KTab))   ?>>! prevWinE,
-    ctrl (char 'n')            ?>>! startMenu test,
+    ctrl (char 'n')            ?>>! startMenu mainMenu,
     ctrl (char 'q')            ?>>! askQuitEditor,
     ctrl (char 'f')            ?>>  isearchKeymap Forward,
     ctrl (char 'x')            ?>>! cut,

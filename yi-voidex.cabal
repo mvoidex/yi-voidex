@@ -17,4 +17,5 @@ library
     exposed-modules:
         Yi.Keymap.Menu
         Yi.Keymap.Users.VoidEx
+        Yi.Keymap.Users.VoidEx.Menu
         Yi.Config.Users.VoidEx
