@@ -2,13 +2,20 @@ module Yi.Keymap.Users.VoidEx (
     keymapSet,
     keymap,
 
-    input, move, select, other,
-    moveKeys
+    inputChar, move, select, other,
+    moveKeys,
+
+    cut, del, copy, paste
     ) where
 
 import Prelude (length, take, drop)
 
 import Yi.Core
+import Yi.File
+import Yi.Keymap.Emacs.Utils
+import Yi.Misc (adjBlock)
+import Yi.Rectangle
+import Yi.String
 
 -- | Keymap set
 keymapSet :: KeymapSet
@@ -16,11 +23,11 @@ keymapSet = modelessKeymapSet keymap
 
 -- | Keymap
 keymap :: Keymap
-keymap = input <|> move <|> select <|> other
+keymap = inputChar <|> move <|> select <|> other
 
 -- | Printable chars
-input :: Keymap
-input = do
+inputChar :: Keymap
+inputChar = do
     c <- printableChar
     write (withBuffer0 $ replaceSel [c])
 
@@ -40,12 +47,12 @@ other = choice [
     spec KEnter        ?>>! replaceSel "\n",
     spec KTab          ?>>! (replaceSel =<< tabB),
     ctrl (char 'q')    ?>>! askQuitEditor,
-    ctrl (char 'f')    ?>>! isearchKeymap Forward,
+    ctrl (char 'f')    ?>>  isearchKeymap Forward,
     ctrl (char 'x')    ?>>! cut,
     ctrl (char 'c')    ?>>! copy,
-    ctrl (char 'v')    ?>>! parse,
+    ctrl (char 'v')    ?>>! paste,
     ctrl (spec KIns)   ?>>! copy,
-    shift (spec KIns)  ?>>! parse,
+    shift (spec KIns)  ?>>! paste,
     ctrl (char 'z')    ?>>! undoB,
     ctrl (char 'y')    ?>>! redoB,
     ctrl (char 's')    ?>>! fwriteE,
@@ -71,7 +78,7 @@ moveKeys = [
     (spec KUp               , moveB VLine Backward),
     (spec KDown             , moveB VLine Forward),
     (spec KRight            , moveB Character Forward),
-    (spec KLeft             , moveB Characted Backward)]
+    (spec KLeft             , moveB Character Backward)]
 
 -- | Cut action
 cut :: EditorM ()
@@ -86,7 +93,8 @@ del = do
         else withBuffer0 $ deleteRegionB =<< getSelectRegionB
 
 -- | Copy action
-copy = (setRegE <<=) $ withBuffer $ do
+copy :: EditorM ()
+copy = (setRegE =<<) $ withBuffer0 $ do
     asRect <- getA rectangleSelectionA
     if not asRect
         then readRegionB =<< getSelectRegionB
@@ -118,7 +126,7 @@ deleteSel act = do
     hasSel <- withBuffer $ getA highlightSelectionA
     if hasSel
         then withEditor del
-        else withBuffer (abjBlock (-1) >> act)
+        else withBuffer (adjBlock (-1) >> act)
 
 -- | Set rectangle selection mode
 setMark :: Bool -> BufferM ()
@@ -131,4 +139,4 @@ setMark b = do
 
 -- | Drop rectangle selection mode
 unsetMark :: BufferM ()
-unserMark = putA highlightSelectionA False
+unsetMark = putA highlightSelectionA False
