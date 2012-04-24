@@ -22,7 +22,7 @@ import Yi.Window
 import Yi.TextCompletion (wordComplete)
 
 import Yi.Keymap.Menu (startMenu)
-import Yi.Keymap.Users.VoidEx.Menu (mainMenu)
+import Yi.Keymap.Users.VoidEx.Menu
 
 -- | Keymap set
 keymapSet :: KeymapSet
@@ -54,8 +54,11 @@ other = choice [
     spec KEnter                ?>>! replaceSel "\n",
     spec KTab                  ?>>! (replaceSel =<< tabB),
     shift (spec KTab)          ?>>! wordComplete,
-    --ctrl (char ' ')            ?>>! wordComplete,
     ctrl (char 'n')            ?>>! startMenu mainMenu,
+    ctrl (char 'w')            ?>>! startMenu windowsMenu,
+    ctrl (char 'b')            ?>>! startMenu buffersMenu,
+    ctrl (char 't')            ?>>! startMenu tabsMenu,
+    ctrl (char 'g')            ?>>! startMenu ghciMenu,
     ctrl (char 'q')            ?>>! askQuitEditor,
     ctrl (char 'f')            ?>>  isearchKeymap Forward,
     ctrl (char 'x')            ?>>! cut,
