@@ -91,9 +91,8 @@ startMenu m = do
     where
         startMenu' ctx = showMenu . foldMenu onItem onSub where
             showMenu :: [(String, Maybe Keymap)] -> EditorM ()
-            showMenu is = do
-                spawnMinibufferE (intercalate " " (map fst is)) (const (subMap is))
-                return ()
+            showMenu is = void $ spawnMinibufferE menuItems (const (subMap is)) where
+                menuItems = (intercalate " " (map fst is))
             onItem title act = (title, fmap (act ctx) (menuEvent title)) where
             onSub title is = (title, fmap subMenu (menuEvent title)) where
                 subMenu c = char c ?>>! closeBufferAndWindowE >> showMenu is
