@@ -2,7 +2,7 @@ module Yi.Keymap.Menu (
     Menu,
     MenuItem,
     MenuContext(..),
-    menu, actionB_, actionB, actionE_, actionE, actionY_, actionY,
+    menu, action, action_,
     startMenu
     ) where
 
@@ -33,34 +33,16 @@ data MenuContext = MenuContext {
 menu :: String -> Menu -> MenuItem
 menu = SubMenu
 
--- | Action on buffer
-actionB_ :: String -> BufferM () -> MenuItem
-actionB_ title act = actionB title (const act)
+-- | Action on item
+action_ :: (YiAction a x, Show x) => String -> a -> MenuItem
+action_ title act = action title (const act)
 
--- | Action on buffer with context
-actionB :: String -> (MenuContext -> BufferM ()) -> MenuItem
-actionB title act = MenuAction title act' where
+-- | Action on item with context
+action :: (YiAction a x, Show x) => String -> (MenuContext -> a) -> MenuItem
+action title act = MenuAction title act' where
     act' ctx c = char c ?>>! (do
-        closeBufferAndWindowE
-        withGivenBuffer0 (parentBuffer ctx) (act ctx))
-
--- | Action menu
-actionE_ :: String -> EditorM () -> MenuItem
-actionE_ title act = actionE title (const act)
-
--- | Action with context
-actionE :: String -> (MenuContext -> EditorM ()) -> MenuItem
-actionE title act = MenuAction title act' where
-    act' ctx c = char c ?>>! (closeBufferAndWindowE >> act ctx)
-
--- | Action on Yi
-actionY_ :: String -> YiM () -> MenuItem
-actionY_ title act = actionY title (const act)
-
--- | Action on Yi with context
-actionY :: String -> (MenuContext -> YiM ()) -> MenuItem
-actionY title act = MenuAction title act' where
-    act' ctx c = char c ?>>! (withEditor closeBufferAndWindowE >> act ctx)
+        withEditor closeBufferAndWindowE
+        runAction $ makeAction (act ctx))
 
 -- | Fold menu item
 foldItem

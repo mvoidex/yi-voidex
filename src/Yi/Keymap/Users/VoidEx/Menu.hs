@@ -20,11 +20,11 @@ import Yi.Keymap.Menu
 mainMenu :: Menu
 mainMenu = [
     menu "File" [
-        actionY_ "Quit" askQuitEditor,
-        actionY "Save" (fwriteBufferE . parentBuffer)],
+        action_ "Quit" askQuitEditor,
+        action "Save" (fwriteBufferE . parentBuffer)],
     menu "Edit" [
-        actionY_ "Auto complete" wordComplete,
-        actionE_ "Completion" completeWordB],
+        action_ "Auto complete" wordComplete,
+        action_ "Completion" completeWordB],
     menu "Tools" [
         menu "Ghci" ghciMenu],
     menu "View" [
@@ -32,40 +32,40 @@ mainMenu = [
         menu "Tabs" tabsMenu,
         menu "Buffers" buffersMenu,
         menu "Layout" [
-            actionE_ "Next" layoutManagersNextE,
-            actionE_ "Previous" layoutManagersPreviousE]]]
+            action_ "Next" layoutManagersNextE,
+            action_ "Previous" layoutManagersPreviousE]]]
 
 -- | Windows menu
 windowsMenu :: Menu
 windowsMenu = [
-            actionE_ "Next" nextWinE,
-            actionE_ "Previous" prevWinE,
-            actionE_ "Split" splitE,
-            actionE_ "sWap" swapWinWithFirstE,
-            actionE_ "Close" tryCloseE,
-            actionE_ "cLose-all-but-this" closeOtherE]
+    action_ "Next" nextWinE,
+    action_ "Previous" prevWinE,
+    action_ "Split" splitE,
+    action_ "sWap" swapWinWithFirstE,
+    action_ "Close" tryCloseE,
+    action_ "cLose-all-but-this" closeOtherE]
 
 -- | Buffers menu
 buffersMenu :: Menu
 buffersMenu = [
-            actionE_ "Next" nextBufW,
-            actionE_ "Previous" prevBufW,
-            actionE_ "Close" closeBufferAndWindowE,
-            actionE_ "Show all" openAllBuffersE]
+    action_ "Next" nextBufW,
+    action_ "Previous" prevBufW,
+    action_ "Close" closeBufferAndWindowE,
+    action_ "Show all" openAllBuffersE]
 
 -- | Tabs menu
 tabsMenu :: Menu
 tabsMenu = [
-            actionE_ "Next" nextTabE,
-            actionE_ "Previous" previousTabE,
-            actionE_ "neW" newTabE,
-            actionE_ "Delete" deleteTabE]
+    action_ "Next" nextTabE,
+    action_ "Previous" previousTabE,
+    action_ "neW" newTabE,
+    action_ "Delete" deleteTabE]
 
 -- | GHCi menu
 ghciMenu :: Menu
 ghciMenu = [
-            actionY_ "Load" ghciLoad,
-            actionY_ "Infer-type" ghciInfer]
+    action_ "Load" ghciLoad,
+    action_ "Infer-type" ghciInfer]
 
 -- | Load buffer in GHCi
 ghciLoad :: YiM ()
