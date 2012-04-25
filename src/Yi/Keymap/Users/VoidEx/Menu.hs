@@ -12,6 +12,7 @@ import Yi.Core
 import Yi.File
 import Yi.Keymap.Emacs.Utils (askQuitEditor)
 import Yi.Mode.Haskell (ghciLoadBuffer, ghciInferType, ghciSend)
+import Yi.Mode.Haskell.HLint
 import Yi.TextCompletion
 
 import Yi.Keymap.Menu
@@ -26,7 +27,8 @@ mainMenu = [
         action_ "Auto complete" wordComplete,
         action_ "Completion" completeWordB],
     menu "Tools" [
-        menu "Ghci" ghciMenu],
+        menu "Ghci" ghciMenu,
+        action_ "Hlint" hlint],
     menu "View" [
         menu "Windows" windowsMenu,
         menu "Tabs" tabsMenu,
