@@ -8,6 +8,7 @@ module Yi.Keymap.Users.VoidEx.Menu (
 
 import Prelude ()
 
+import Yi.Command
 import Yi.Core
 import Yi.File
 import Yi.Keymap.Emacs.Utils (askQuitEditor)
@@ -29,7 +30,8 @@ mainMenu = [
         action_ "Sort lines" sortLines],
     menu "Tools" [
         menu "Ghci" ghciMenu,
-        action_ "Hlint" hlint],
+        action_ "Hlint" hlint,
+        action_ "Shell command" shellCommandE],
     menu "View" [
         menu "Windows" windowsMenu,
         menu "Tabs" tabsMenu,
