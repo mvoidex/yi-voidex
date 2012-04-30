@@ -15,12 +15,6 @@ import Yi.Keymap.Users.VoidEx (keymapSet)
 voidexConfig :: Config
 voidexConfig = defaultConfig {
     defaultKm = keymapSet,
-    initialActions = [BufferA setIndent],
+--    initialActions = [BufferA setIndent],
     configUI = (configUI defaultConfig) {
         configWindowFill = ' ' }}
-
--- | Set default indentation size to 4
-setIndent :: BufferM ()
-setIndent = modifyMode $ modeIndentSettingsA ^: modifyIndent where
-    modifyIndent is = is {
-        tabSize = 4 }

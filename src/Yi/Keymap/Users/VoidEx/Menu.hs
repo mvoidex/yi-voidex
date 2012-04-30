@@ -25,7 +25,8 @@ mainMenu = [
         action "Save" (fwriteBufferE . parentBuffer)],
     menu "Edit" [
         action_ "Auto complete" wordComplete,
-        action_ "Completion" completeWordB],
+        action_ "Completion" completeWordB,
+        action_ "Sort lines" sortLines],
     menu "Tools" [
         menu "Ghci" ghciMenu,
         action_ "Hlint" hlint],
@@ -35,7 +36,9 @@ mainMenu = [
         menu "Buffers" buffersMenu,
         menu "Layout" [
             action_ "Next" layoutManagersNextE,
-            action_ "Previous" layoutManagersPreviousE]]]
+            action_ "Previous" layoutManagersPreviousE]],
+    menu "Settings" [
+        action_ "set Indent" setIndent]]
 
 -- | Windows menu
 windowsMenu :: Menu
@@ -80,3 +83,9 @@ ghciInfer :: YiM ()
 ghciInfer = do
     ghciLoad
     ghciInferType
+
+-- | Set default indentation size to 4
+setIndent :: BufferM ()
+setIndent = modifyMode $ modeIndentSettingsA ^: modifyIndent where
+    modifyIndent is = is {
+        tabSize = 4 }

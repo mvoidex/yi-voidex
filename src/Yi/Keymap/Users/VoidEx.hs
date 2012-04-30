@@ -12,6 +12,8 @@ import Prelude (length, take, drop)
 
 import Control.Monad (void)
 
+import Data.Char (isSpace)
+
 import Yi.Core
 import Yi.File
 import Yi.Keymap.Emacs.Utils
@@ -49,11 +51,13 @@ select = choice [shift k ?>>! setMark False >> a | (k, a) <- moveKeys]
 -- | Other commands
 other :: Keymap
 other = choice [
-    spec KBS                   ?>>! deleteSel bdeleteB,
+    spec KBS                   ?>>! deleteSel backSpace,
     spec KDel                  ?>>! deleteSel (deleteN 1),
-    spec KEnter                ?>>! replaceSel "\n",
-    spec KTab                  ?>>! (replaceSel =<< tabB),
-    shift (spec KTab)          ?>>! wordComplete,
+    spec KEnter                ?>>! deleteSel newlineAndIndentB,
+    spec KTab                  ?>>! autoIndentB IncreaseOnly,
+    shift (spec KTab)          ?>>! autoIndentB DecreaseOnly,
+    --spec KTab                  ?>>! (replaceSel =<< tabB),
+    --shift (spec KTab)          ?>>! wordComplete,
     ctrl (char 'n')            ?>>! startMenu mainMenu,
     ctrl (char 'w')            ?>>! startMenu windowsMenu,
     ctrl (char 'b')            ?>>! startMenu buffersMenu,
@@ -165,3 +169,12 @@ setMark b = do
 -- | Drop rectangle selection mode
 unsetMark :: BufferM ()
 unsetMark = putA highlightSelectionA False
+
+-- | Delete characted or decrease indent
+backSpace :: BufferM ()
+backSpace = do
+    (line, col) <- getLineAndCol
+    before <- readPreviousOfLnB
+    if col > 0 && all isSpace before
+        then autoIndentB DecreaseOnly
+        else bdeleteB
